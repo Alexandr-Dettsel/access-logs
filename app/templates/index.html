@@ -1,8 +1,37 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section>
-    <h2>Добро пожаловать!</h2>
+<section class="panel">
+    <div class="panel-head">
+        <h2>Nginx access logs</h2>
+        <div class="meta">
+            <span>Последнее обращение: <strong id="last-access">—</strong></span>
+            <span>Всего в буфере: <strong id="count">0</strong></span>
+            <span>Обновлено: <strong id="updated-at">—</strong></span>
+        </div>
+    </div>
+
+    <div id="error-box" class="error-box hidden"></div>
+
+    <div class="table-wrap">
+        <table class="logs-table">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>time_local</th>
+                <th>remote_addr</th>
+                <th>request</th>
+                <th>status</th>
+                <th>request_time</th>
+                <th>ingested_at_utc</th>
+            </tr>
+            </thead>
+            <tbody id="logs-tbody">
+            <tr>
+                <td colspan="7" class="empty-row">Пока нет данных</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </section>
 {% endblock %}
-

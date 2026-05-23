@@ -3,7 +3,7 @@ import os
 from collections import deque
 from datetime import datetime, timezone
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, render_template, request
 
 main_bp = Blueprint("main", __name__)
 
@@ -18,6 +18,11 @@ def now_utc_iso():
 
 @main_bp.route("/", methods=["GET"])
 def index():
+    return render_template("index.html", title="Логи подключений")
+
+
+@main_bp.get("/logs")
+def logs():
     global last_access_utc
     last_access_utc = now_utc_iso()
     return jsonify({
@@ -29,14 +34,12 @@ def index():
 
 @main_bp.post("/ingest")
 def ingest():
-    """
-    POST /ingest — сюда cron присылает новые строки access.log.
-    Ожидаем JSON вида: {"lines": ["{...}", "{...}"], "sent_at_utc":"..."}
-    """
-    data = request.get_json(force=True, silent=False)
+    data = request.get_json(force=True, silent=False) or {}
     lines = data.get("lines", [])
+
+    received = 0
     for line in lines:
-        line = line.strip()
+        line = (line or "").strip()
         if not line:
             continue
 
@@ -47,5 +50,6 @@ def ingest():
 
         obj["_ingested_at_utc"] = now_utc_iso()
         lastN.append(obj)
+        received += 1
 
-    return jsonify({"ok": True, "received": len(lines)}), 200
+    return jsonify({"ok": True, "received": received}), 200

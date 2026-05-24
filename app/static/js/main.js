@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
             lastAccessEl.textContent = formatDateTime(data.last_access_utc);
             countEl.textContent = String(data.count ?? 0);
             updatedAtEl.textContent = new Date().toLocaleTimeString("ru-RU");
-            renderRows(data.last_10_log_entries || []);
+            renderRows(data.last_N_log_entries || []);
             setError("");
         } catch (err) {
             setError(`Не удалось обновить данные: ${err.message}`);

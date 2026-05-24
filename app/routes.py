@@ -25,9 +25,11 @@ def index():
 def logs():
     global last_access_utc
     last_access_utc = now_utc_iso()
+    entries = list(lastN)
     return jsonify({
         "last_access_utc": last_access_utc,
-        "last_N_log_entries": list(lastN),
+        "last_N_log_entries": entries,
+        "last_10_log_entries": entries,  # алиас (тот же список) — чтобы не ломать старые клиенты
         "count": len(lastN),
     })
 

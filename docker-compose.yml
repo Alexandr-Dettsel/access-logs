@@ -1,8 +1,12 @@
-version: '3.9'
-
 services:
   nginx:
     image: nginx:1.27-alpine
+    command: >
+      /bin/sh -lc "
+      rm -f /var/log/nginx/access.log /var/log/nginx/error.log;
+      touch /var/log/nginx/access.log /var/log/nginx/error.log;
+      nginx -g 'daemon off;'
+      "
     container_name: nginx
     ports:
       - "80:80"

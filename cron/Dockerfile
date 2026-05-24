@@ -7,4 +7,5 @@ WORKDIR /cron
 COPY collect_logs.sh /cron/collect_logs.sh
 RUN chmod +x /cron/collect_logs.sh
 
-CMD ["/bin/sh", "/cron/collect_logs.sh"]
+COPY crontab /etc/crontabs/root
+CMD ["crond", "-f", "-l", "8"]

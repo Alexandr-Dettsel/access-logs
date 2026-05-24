@@ -30,31 +30,20 @@ if [ "$NEW_COUNT" -le 0 ]; then
   exit 0
 fi
 
-# берём только новые строки
-LINES="$(tail -n "$NEW_COUNT" "$NGINX_ACCESS_LOG")"
-
-# готовим JSON (каждая строка как элемент массива)
-# безопасно для JSON-строк: экранируем обратный слеш и кавычки
-JSON_LINES="$(printf '%s\n' "$LINES" | python3 - << 'PY'
-import json, sys
-lines = [l.rstrip("\n") for l in sys.stdin if l.strip()]
-print(json.dumps(lines))
-PY
-)"
-
-PAYLOAD="$(python3 - << PY
-import json, datetime
-print(json.dumps({
-  "sent_at_utc": datetime.datetime.utcnow().isoformat() + "Z",
-  "lines": json.loads('''$JSON_LINES''')
-}))
-PY
-)"
-
-HTTP_CODE="$(curl -sS -o /tmp/ingest.out -w "%{http_code}" \
-  -H "Content-Type: application/json" \
-  -X POST "$FLASK_INGEST_URL" \
-  --data "$PAYLOAD" || true)"
+HTTP_CODE="$({
+  tail -n "$NEW_COUNT" "$NGINX_ACCESS_LOG" | python3 -c '
+import sys, json, datetime
+lines = [line.rstrip("\n") for line in sys.stdin if line.strip()]
+payload = {
+    "sent_at_utc": datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
+    "lines": lines,
+}
+print(json.dumps(payload, ensure_ascii=False))
+' | curl -sS -o /tmp/ingest.out -w "%{http_code}" \
+    -H "Content-Type: application/json" \
+    -X POST "$FLASK_INGEST_URL" \
+    --data-binary @-
+} || true)"
 
 if [ "$HTTP_CODE" = "200" ]; then
   echo "$TOTAL" > "$STATE_FILE"

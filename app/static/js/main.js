@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!tbody) return;
 
-    const POLL_MS = 1000;
+    const POLL_MS = 10000;
 
     function escapeHtml(str) {
         return String(str ?? "")
@@ -53,15 +53,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const rows = [...entries].reverse().map((row, idx) => {
             const status = row.status ?? "";
+            const geo = row.geo || {};
+            const geoText = (geo.country || "") + (geo.city ? (", " + geo.city) : "");
             return `
                 <tr>
                     <td>${idx + 1}</td>
-                    <td>${escapeHtml(row.time_local ?? row.time ?? "-")}</td>
+                    <td>${escapeHtml(formatDateTime(row.time_local ?? row.time ?? "-"))}</td>
                     <td>${escapeHtml(row.remote_addr ?? "-")}</td>
+                    <td>${escapeHtml(geoText)}</td>
                     <td class="req-cell">${escapeHtml(row.request ?? row.raw ?? "-")}</td>
                     <td><span class="${statusClass(status)}">${escapeHtml(status || "-")}</span></td>
                     <td>${escapeHtml(row.request_time ?? "-")}</td>
-                    <td>${escapeHtml(formatDateTime(row._ingested_at_utc))}</td>
                 </tr>
             `;
         });

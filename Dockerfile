@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 ENV PYTHONUNBUFFERED=1
-ENV LOG_MAX=10
+ENV LOG_MAX=100
 
 CMD ["python", "run.py"]
 
